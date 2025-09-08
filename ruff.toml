@@ -1,0 +1,6 @@
+select = ["E", "F", "B"]
+ignore = ["E501"]
+unfixable = ["B"]
+
+[per-file-ignores]
+"tools/**/*.py" = ["F401"]

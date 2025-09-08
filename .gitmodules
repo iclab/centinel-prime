@@ -1,0 +1,3 @@
+[submodule "tools/iclab-downloader"]
+	path = tools/iclab-downloader
+	url = git@github.com:iclab/iclab-downloader.git

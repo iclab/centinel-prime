@@ -1,0 +1,13 @@
+# run output
+/vpns/
+/downloads/
+
+# build output
+/main
+*.o
+
+# editor backup files etc.
+*~
+.#*
+\#*#
+.*.sw[op]

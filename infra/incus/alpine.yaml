@@ -365,6 +365,7 @@ packages:
     - openvpn
     - tcpdump
     - curl
+    - bind-tools
     - unzip
     - openssl
     - wget
@@ -373,12 +374,7 @@ packages:
     - iptables
     - net-tools
     - bash
-    # eBPF dependencies
-    - clang
-    - llvm
-    - libbpf-dev
-    - bpftool
-    - linux-headers
+    - nftables
     action: install
     types:
     - vm
@@ -553,78 +549,6 @@ actions:
     set -eux
 
     echo "1" > /proc/sys/net/ipv4/ip_forward
-    iptables -P FORWARD DROP
-
-  types:
-  - vm
-
-# eBPF setup
-- trigger: post-files
-  action: |-
-    #!/bin/sh
-    set -eux
-
-    # Mount eBPF filesystem
-    mkdir -p /sys/fs/bpf
-    mount -t bpf bpf /sys/fs/bpf
-
-    # Make eBPF loader executable
-    chmod +x /experiments/ebpf/ebpf_loader.sh
-    chmod +x /experiments/ebpf/ebpf_utils.py
-
-    # Compile eBPF programs at build time
-    cd /experiments/ebpf
-    echo "Compiling eBPF programs at build time..."
-    
-    # Compile XDP program with BTF support
-    clang -O2 -target bpf -g -c xdp_router.c -o xdp_router.o
-    if [ $? -eq 0 ]; then
-        echo "XDP program compiled successfully"
-    else
-        echo "Failed to compile XDP program"
-        exit 1
-    fi
-    
-    # Compile TC program with BTF support
-    clang -O2 -target bpf -g -c tc_nat.c -o tc_nat.o
-    if [ $? -eq 0 ]; then
-        echo "TC NAT program compiled successfully"
-    else
-        echo "Failed to compile TC NAT program"
-        exit 1
-    fi
-    
-    # Create eBPF maps (but don't load programs yet)
-    echo "Creating eBPF maps..."
-    
-    # Function to create map if it doesn't exist
-    create_map_if_not_exists() {
-        local map_path="$1"
-        local map_type="$2"
-        local key_size="$3"
-        local value_size="$4"
-        local max_entries="$5"
-        local map_name="$6"
-        
-        if [ ! -f "$map_path" ]; then
-            echo "Creating map: $map_name"
-            bpftool map create "$map_path" type "$map_type" key "$key_size" value "$value_size" entries "$max_entries" name "$map_name" || {
-                echo "Warning: Failed to create map $map_name, will be created at runtime"
-            }
-        else
-            echo "Map $map_name already exists"
-        fi
-    }
-    
-    # Create all required maps
-    create_map_if_not_exists "/sys/fs/bpf/namespace_configs" "hash" 4 24 100 "namespace_configs"
-    create_map_if_not_exists "/sys/fs/bpf/connection_tracking" "lru_hash" 20 4 10000 "connection_tracking"
-    create_map_if_not_exists "/sys/fs/bpf/nat_port_mapping" "lru_hash" 20 2 10000 "nat_port_mapping"
-    create_map_if_not_exists "/sys/fs/bpf/reverse_nat_mapping" "lru_hash" 4 20 10000 "reverse_nat_mapping"
-    create_map_if_not_exists "/sys/fs/bpf/stats" "array" 4 8 10 "stats"
-    create_map_if_not_exists "/sys/fs/bpf/nat_stats" "array" 4 8 10 "nat_stats"
-    
-    echo "eBPF build-time setup completed successfully"
 
   types:
   - vm

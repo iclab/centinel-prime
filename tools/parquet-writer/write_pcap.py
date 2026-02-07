@@ -9,9 +9,9 @@ pcap_file = os.environ.get('PCAP_FILE')
 url = os.environ.get('URL')
 sslkeylogfile = os.environ.get('SSLKEYLOGFILE')
 
-# Use thread ID to create unique filename
+# Use PID + thread ID to create unique filename across processes
 thread_id = threading.get_ident()
-output_file = f"/output_{thread_id}.parquet"
+output_file = f"/output_{os.getpid()}_{thread_id}.parquet"
 
 # check if file exists
 if not os.path.exists(pcap_file):

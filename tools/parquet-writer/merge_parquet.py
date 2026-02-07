@@ -38,8 +38,9 @@ def merge_parquet_files():
 
     # add custom metadata
     data = json.load(open("/metadata.json"))
-    existing_metadata = merged_table.schema.metadata
-    merged_metadata = {**existing_metadata, **{"custom_metadata": json.dumps(data.encode("utf-8"))}}
+    existing_metadata = merged_table.schema.metadata or {}
+    merged_metadata = dict(existing_metadata)
+    merged_metadata[b"custom_metadata"] = json.dumps(data).encode("utf-8")
     merged_table = merged_table.replace_schema_metadata(merged_metadata)
 
     # Write merged table to final output

@@ -6,6 +6,20 @@ import sys
 import base64
 from pathlib import Path
 
+def _read_custom_metadata(file_path):
+    """Read custom metadata from parquet schema metadata."""
+    try:
+        metadata = pq.ParquetFile(file_path).schema_arrow.metadata or {}
+        raw = metadata.get(b"custom_metadata")
+        if not raw:
+            return {}
+        if isinstance(raw, bytes):
+            raw = raw.decode("utf-8")
+        return json.loads(raw)
+    except Exception as e:
+        print(f"Error reading custom metadata: {e}")
+        return {}
+
 def print_data_structure(file_path):
     """Print the structure of the parquet file"""
     try:
@@ -28,9 +42,11 @@ def print_data_structure(file_path):
         print(f"Error reading parquet file: {e}")
         return None
 
-def create_row_folders(df, output_dir="output_rows"):
+def create_row_folders(df, output_dir="output_rows", base_metadata=None):
     """Create folders for each row with separated data"""
     try:
+        if base_metadata is None:
+            base_metadata = {}
         # Create output directory
         Path(output_dir).mkdir(exist_ok=True)
         
@@ -139,9 +155,13 @@ def create_row_folders(df, output_dir="output_rows"):
                 else:
                     json_data[key] = value
             
+            # Merge base (file-level) metadata with row-level metadata
+            merged_metadata = dict(base_metadata)
+            merged_metadata.update(json_data)
+
             json_path = row_folder / "metadata.json"
             with open(json_path, 'w') as f:
-                json.dump(json_data, f, indent=2, default=str)
+                json.dump(merged_metadata, f, indent=2, default=str)
             print(f"  - Wrote metadata: {json_path}")
             
     except Exception as e:
@@ -164,7 +184,8 @@ if __name__ == "__main__":
     
     # Print structure
     df = print_data_structure(file_path)
+    base_metadata = _read_custom_metadata(file_path)
     
     if df is not None:
         # Create row folders
-        create_row_folders(df)
+        create_row_folders(df, base_metadata=base_metadata)

@@ -43,7 +43,7 @@ def show_queue() -> None:
 def _process_url(url: str, instance_name: str, is_vpn: bool) -> str:
     """Process a single URL download in a thread-safe manner."""
     try:
-        output = execute_command(f"bash /experiments/parquet-downloader.sh --url {url.strip()} --vpn {is_vpn}", instance_name)
+        output = execute_command(f"bash /experiments/parquet-downloader-nftables.sh --url {url.strip()} --vpn {is_vpn}", instance_name)
         print_debug(output)
         return f"Successfully processed URL: {url.strip()}"
     except Exception as e:
@@ -102,7 +102,7 @@ def _start_exp(spec: ExperimentSpec, max_url_threads: int = 3) -> str:
         results_dir = build_results_dir(spec, metadata_hash)
         pull_results_files(instance_name, results_dir)
 
-        # cleanup_instance(instance_name)
+        cleanup_instance(instance_name)
         return f"Completed {instance_name}"
     except Exception as e:
         try:
@@ -155,7 +155,7 @@ def run_exp(max_instances: int, max_url_threads: int = 20) -> None:
 
 def run_baseline(num_threads: int = 5, max_url_threads: int = 5):
     queue_exp(
-        url_file_name="citizenlab_global.txt",
+        url_file_name="citizenlab_global_100.txt",
         is_vpn=False,
         vpn_provider=None,
         location=None,

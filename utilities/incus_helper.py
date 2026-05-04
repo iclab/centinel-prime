@@ -114,6 +114,15 @@ def pull_file(instance_name: str, file_path: str, local_path: str):
         print(f"Error pulling file {file_path} from instance {instance_name}")
         print(output.stderr.decode())
 
+def push_file(instance_name: str, local_path: str, file_path: str):
+    process = f'incus file push {local_path} {instance_name}{file_path}'
+    print_debug(f"{instance_name}: Pushing file {local_path} to {file_path}")
+    print_debug(f"{instance_name}: Command: {process}")
+    output = subprocess.run(process, capture_output=True, shell=True)
+    if output.returncode != 0:
+        print(f"Error pushing file {local_path} to instance {instance_name}")
+        print(output.stderr.decode())
+
 def check_incus_installed():
     try:
         subprocess.run(["incus", "--version"], capture_output=True, check=True)

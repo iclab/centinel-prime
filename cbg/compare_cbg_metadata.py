@@ -17,9 +17,7 @@ import glob
 import argparse
 from datetime import datetime
 from collections import Counter
-
-import reverse_geocoder as rg   # TODO: delete this module later
-
+ 
 SIGMA = 500000 # for confidence score
 WEIGHTS = {'cbg': 1.0,
            'cloudflare': 0.9,
@@ -60,7 +58,8 @@ def load_cbg_results(cbg_fpath: str) -> dict:
                 'countries': countries,
                 'match': row.get('match', ''),
                 'area_km2': float(row['area_km2']) if row.get('area_km2') and row['area_km2'] != 'None' else None,
-                'center': row.get('center', '')
+                'center': row.get('center', ''),
+                'center_country': row.get('center_country', ''),
             }
     return results
 
@@ -91,13 +90,10 @@ def extract_claimed_country_from_name(vpn_name: str, ) -> str:
     return ''
 
 
-def get_cbg_vote(cbg_result: dict, claimed_cc: str, name_to_iso2: dict) -> tuple[dict, float]:
+def get_cbg_vote(cbg_result: dict, claimed_cc: str, name_to_iso2: dict) ->  tuple[dict, float, str]:
     """Get CBG's vote for the claimed country and confidence score for each country. """ 
         
-    # TODO: Replace with center_country = cbg_result['center_country']
-    lat, lon = ast.literal_eval(cbg_result['center'])
-    result = rg.search((lat, lon))
-    center_country = result[0]['cc']
+    center_country = cbg_result.get('center_country', '')
 
     intersecting = set([name_to_iso2.get(ct, ct) for ct in cbg_result.get('countries', [])])
     

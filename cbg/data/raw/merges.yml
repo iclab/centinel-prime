@@ -1,0 +1,190 @@
+# Rules for merging map units.
+#
+# Each map unit in ne_10m_admin_0_map_units.zip has a unique GU_A3
+# code, which identifies the unit itself, and a non-unique SOV_A3 code
+# which identifies the sovereign state responsible for that map unit.
+#
+# For each of the rules below, all of the map units whose GU_A3 codes
+# appear on the right-hand side of the rule are combined and the
+# resulting MultiPolygon is labeled with the code on the left-hand side
+# of the rule.
+#
+# All map units that were not mentioned in these rules are combined as
+# if there were a rule for each unique SOV_A3 code, listing all of
+# the map units with that SOV_A3.
+#
+# To avoid conflicts, codes on the left-hand side of a rule should be
+# either officially assigned ISO 3166-1 alpha-3 codes, or they should
+# be in the alpha-3 private use area (XAA-XZZ, excluding XOM, XPO, and
+# XXA-XXZ which are used for special purposes by various international
+# organizations).
+#
+# Also, whenever the SOV_A3 code is not the same as the ISO_A3 code
+# for the metropolitan region of the state in question, there should
+# be an override rule just so that the state is identified by its ISO
+# 3166-1 code in the output of analyze-landmarks.
+#
+# Many of the choices embodied by the rules below are arbitrary.
+# The logic they follow is: Any land area with its own ISO_A3 code
+# should be treated separately, because VPN services that make
+# exaggerated claims may well also treat them separately.  For areas
+# without ISO_A3 codes, treat breakaway regions separately even if not
+# internationally recognized, and separate disputed regions from _all_
+# disputants.
+#
+# Include undisputed dependencies with the motherland if and only if
+# they are geographically close enough that the centroid of all the
+# merged land area is still within a reasonable range of the
+# motherland.  For instance, Alaska and Hawaii are included with the
+# USA, but Clipperton Island is not considered part of France.
+#
+# Finally, low-population unclaimed or disputed remote islands, none
+# of which plausibly has a data center onshore, may be lumped together
+# within a geographic area.
+#
+# (A wise man once said: A language is a dialect with an army and navy.
+# The difference between a state and a dependency is quite similar.)
+
+# Australia: separate dependencies with their own ISO_A3 codes.
+AUS: [AUS, ATC, CSI]
+CCK: [CCK]
+CXR: [CXR]
+HMD: [HMD]
+NFK: [NFK]
+
+# China: separate dependencies with their own ISO_A3 codes, and
+# disputed territory (see XPF).
+CHN: [CHN]
+HKG: [HKG]
+MAC: [MAC]
+
+# Cuba: don't include Guantanamo Bay.
+# (If anyone managed to put a VPN server in the base, it probably wouldn't
+# be getting its connectivity from Cuba.)
+CUB: [CUB]
+XGB: [USG]
+
+# Cyprus Island: split three ways:
+# CYP = Cyprus; claims entire island; de facto control over only the
+# CYP geographic unit.
+# XCN = Northern Cyprus; de facto control over CYN geographic unit,
+# recognized only by Turkey, no official ISO_A3 allocation.
+# XCX = Cyprus eXtraterritorial; the No Man's Area and the UK
+# military bases.
+CYP: [CYP]
+XCN: [CYN]
+XCX: [CNM, ESB, WSB]
+
+# Denmark: separate dependencies with their own ISO_A3 codes.
+DNK: [DNK]
+FRO: [FRO]
+GRL: [GRL]
+
+# Finland: separate dependencies with their own ISO_A3 codes.
+ALA: [ALD]
+FIN: [FIN]
+
+# France: separate all the dependencies, including Clipperton Island
+# (which is the only one not to have an ISO_A3 code), so that the
+# centroid chosen for FRA is reasonable.
+FRA: [FXX]
+ATF: [ATF]
+BLM: [BLM]
+GLP: [GLP]
+GUF: [GUF]
+MAF: [MAF]
+MTQ: [MTQ]
+NCL: [NCL]
+PYF: [PYF]
+REU: [REU]
+SPM: [SPM]
+WLF: [WLF]
+MYT: [MYT]
+XCI: [CLP]
+
+# UK: separate dependencies with their own ISO_A3 codes.
+# ??? For our purposes it might make more sense to separate
+# Northern Ireland or lump it with Ireland.
+GBR: [ENG, NIR, SCT, WLS]
+AIA: [AIA]
+BMU: [BMU]
+CYM: [CYM]
+FLK: [FLK]
+GGY: [GGY]
+GIB: [GIB]
+IMN: [IMN]
+IOT: [IOT]
+JEY: [JEY]
+MSR: [MSR]
+PCN: [PCN]
+SGS: [SGS]
+SHN: [SHN]
+TCA: [TCA]
+VGB: [VGB]
+
+# Israel: separate Palestine (Gaza and West Bank together).
+ISR: [ISR]
+PSE: [GAZ, WEB]
+
+# Kazakhstan: include Baykonur Cosmodrome.
+KAZ: [KAB, KAZ]
+
+# Korea: separate the demilitarized zone from both countries.
+KOR: [KOR]
+PRK: [PRK]
+XKD: [KNX, KNZ]
+
+# Morocco: separate Western Sahara.
+MAR: [MAR]
+ESH: [SAH]
+
+# Netherlands: separate dependencies with their own ISO_A3 codes.
+NLD: [NLX]
+ABW: [ABW]
+BES: [NLY]
+CUW: [CUW]
+SXM: [SXM]
+
+# Norway: separate dependencies with their own ISO_A3 codes,
+# recombine Svalbard and Jan Mayen.
+NOR: [NOW]
+BVT: [BVT]
+SJM: [NSV, NJM]
+
+# New Zealand: separate dependencies with their own ISO_A3 codes.
+NZL: [NZL]
+COK: [COK]
+NIU: [NIU]
+TKL: [TKL]
+
+# Somalia/Somaliland/Puntland: separate all.
+SOM: [SOX]
+XSL: [SOL]
+XSP: [SOP]
+
+# South Sudan: SOV_A3 doesn't match ISO_A3 even though it only has one GU.
+SSD: [SDS]
+
+# USA: separate dependencies with their own ISO_A3 codes; lump all of
+# the Minor Outlying Islands in the Pacific, but separate them from the
+# fifty states.  Navassa is filed under XDC (see below).
+USA: [USA]
+ASM: [ASM]
+GUM: [GUM]
+MNP: [MNP]
+PRI: [PRI]
+VIR: [VIR]
+UMI: [DQI, FQI, HQI, JQI, KQI, LQI, MQI, WQI]
+
+# Kosovo: doesn't have an ISO_A3 allocation despite de facto sovereignty.
+XKS: [KOS]
+
+# These disputed territories should not be counted as part of any of
+# the disputants for our purposes.
+# Caribbean disputed islands (variously Colombia, Honduras, Haiti, Jamaica, USA)
+XDC: [BJN, BQI, SER]
+# South China Sea disputed islands (variously mainland China, Malaysia,
+# Phillipines, Taiwan, Vietnam)
+XDS: [PFA, PGA, SCR]
+# Siachen Glacier (India, Pakistan)
+XSG: [KAS]
